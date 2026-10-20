@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "876303429858",
+    "project_id": "bonndia-c26de",
+    "storage_bucket": "bonndia-c26de.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:876303429858:android:6fefbb51fa1889509eeebb",
+        "android_client_info": {
+          "package_name": "com.bonndia.whatsapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCAhaz8V9QMeMSnQMkHP18ghftU-Zkp0CI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
