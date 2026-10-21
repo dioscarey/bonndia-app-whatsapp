@@ -1,9 +1,8 @@
 import { useState } from 'react';
-import { Image, StyleSheet, TextInput, Button, View, Linking, useColorScheme } from 'react-native';
+import { StyleSheet, TextInput, Button, View, Linking, useColorScheme } from 'react-native';
 import * as Clipboard from 'expo-clipboard'; // Import Clipboard from expo-clipboard
 
 
-import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 
@@ -17,7 +16,9 @@ export default function HomeScreen() {
   const colorScheme = useColorScheme(); // Detect current theme
 
   const parsePhone = (p: any) => {
-    return p.replace(/[^\d]/g, "").replace(/^52?1?/, "")
+    const digits = p.replace(/\D/g, "")
+    // Mexican numbers: keep the 10-digit national number, dropping 52 / 521 prefixes
+    return digits.length > 10 ? digits.slice(-10) : digits
   }
 
   const pastePhoneNumber = async () => {
@@ -50,7 +51,7 @@ Presione en la siguiente liga para seleccionar la hora de entrega. Al finalizar,
 📩 Si necesita apoyo para seleccionar la hora, hágamelo saber.
 `
 
-    const link = `https://wa.me/${formattedNumber}?text=${encodeURIComponent(template.trim())}&app_absent=0`;
+    const link = `https://wa.me/52${formattedNumber}?text=${encodeURIComponent(template.trim())}&app_absent=0`;
     setGeneratedLink(link);
   };
 

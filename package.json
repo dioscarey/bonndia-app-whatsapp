@@ -10,7 +10,7 @@
     "web": "expo start --web",
     "test": "jest --watchAll",
     "lint": "expo lint",
-    "buildandroid": "eas build --platform android --profile preview --local"
+    "buildandroid": "expo prebuild --platform android && cd android && gradlew.bat assembleRelease && copy /Y app\\build\\outputs\\apk\\release\\app-release.apk ..\\output-folder\\WhatsAppLinkGenerator.apk"
   },
   "jest": {
     "preset": "jest-expo"

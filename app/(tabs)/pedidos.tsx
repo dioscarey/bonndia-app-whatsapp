@@ -1,5 +1,5 @@
 // ScheduleAppointment.tsx
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import {
   useColorScheme,
   Linking, // ← para abrir URLs
 } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
 import Checkbox from 'expo-checkbox';
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -22,6 +23,8 @@ import * as WebBrowser from 'expo-web-browser';
 
 
 const ScheduleAppointment: React.FC = () => {
+  const routeParams = useLocalSearchParams<{ phone?: string | string[] }>();
+  const initialPhone = Array.isArray(routeParams.phone) ? routeParams.phone[0] : routeParams.phone;
   const colorScheme = useColorScheme(); // ← detecta modo oscuro
   const isDarkMode = colorScheme === 'dark';
 
@@ -38,7 +41,12 @@ const ScheduleAppointment: React.FC = () => {
   const [loadingSearchCustomer, setLoadingSearchCustomer] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
 
-  const parsePhone = (p: any) => p.replace(/[^\d]/g, '').replace(/^52?1?/, '');
+  const parsePhone = (value: string) => {
+    const digits = value.replace(/\D/g, '');
+    if (digits.length === 13 && digits.startsWith('521')) return digits.slice(3);
+    if (digits.length === 12 && digits.startsWith('52')) return digits.slice(2);
+    return digits;
+  };
 
   const pastePhoneNumber = async () => {
     try {
@@ -64,12 +72,21 @@ const ScheduleAppointment: React.FC = () => {
     '18:00-19:00', '19:00-20:00', '20:00-21:00'
   ];
 
-  const handleSearchCustomer = async () => {
-    const cleanedPhone = phoneNumber.replace(/[^\d]/g, '').replace(/^52?1?/, '');
+  const handleSearchCustomer = async (phoneToSearch = phoneNumber) => {
+    const cleanedPhone = parsePhone(phoneToSearch);
+    if (cleanedPhone.length !== 10) {
+      setCustomerInfo(null);
+      setErrors('Ingresa un teléfono mexicano de 10 dígitos.');
+      return;
+    }
+
     try {
       setLoadingSearchCustomer(true);
-      const response = await fetch(`https://us-central1-bonndia-85431.cloudfunctions.net/customers?phone=${cleanedPhone}`);
-      const { data } = await response.json();
+      const query = new URLSearchParams({ phone: cleanedPhone });
+      const response = await fetch(`https://us-central1-bonndia-85431.cloudfunctions.net/customers?${query}`);
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.message || result.error || 'No se pudo buscar el cliente.');
+      const { data } = result;
       const customer = data?.customers?.edges[0]?.node;
       if (!customer) {
         setCustomerInfo('NOT_FOUND');
@@ -84,6 +101,13 @@ const ScheduleAppointment: React.FC = () => {
       setLoadingSearchCustomer(false);
     }
   };
+
+  useEffect(() => {
+    if (!initialPhone) return;
+    const cleanedPhone = parsePhone(initialPhone);
+    setPhoneNumber(cleanedPhone);
+    void handleSearchCustomer(cleanedPhone);
+  }, [initialPhone]);
 
   const handleCreateAgenda = async () => {
     if (!selectedDate || selectedTimeSlot === '---') {
@@ -167,7 +191,7 @@ const ScheduleAppointment: React.FC = () => {
                 keyboardType="phone-pad"
               />
               <View style={styles.row}>
-                <Button title={loadingSearchCustomer ? 'Buscando...' : 'Buscar cliente'} onPress={handleSearchCustomer} />
+                <Button title={loadingSearchCustomer ? 'Buscando...' : 'Buscar cliente'} onPress={() => void handleSearchCustomer()} />
                 <Button title="Pegar" onPress={pastePhoneNumber} color="#00BFFF" />
                 <Button title="Reset" onPress={resetNumber} color="#FF6347" />
               </View>

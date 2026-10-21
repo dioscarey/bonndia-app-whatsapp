@@ -52,12 +52,19 @@ Join our community of developers creating universal apps.
 
 
 
-## Build APk
+## Build an Android APK locally on Windows
 
-If you want to generate the APK on your computer instead of Expo's cloud, run:
+Install Node.js, Java 17, and Android Studio with Android SDK Platform 35 and NDK 26.1.10909125. Then run:
 
-```bash
-eas build --platform android --profile preview 
-```bash
+```powershell
+npm ci
+npm run buildandroid
+```
 
-This command will process the apk on EAS Site,
+The APK is written to `output-folder/WhatsAppLinkGenerator.apk`. To install it over USB, enable USB debugging, connect and authorize your phone, then run:
+
+```powershell
+adb install -r output-folder/WhatsAppLinkGenerator.apk
+```
+
+The local release build uses the Android debug signing key. To update an APK installed with a different signing key, build with that original key or uninstall the old app first. Uninstalling removes its local app data.
